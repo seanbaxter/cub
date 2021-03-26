@@ -56,7 +56,7 @@ template <
     int         BINS,               ///< The number of bins into which histogram samples may fall
     int         BLOCK_DIM_Y,        ///< The thread block length in threads along the Y dimension
     int         BLOCK_DIM_Z,        ///< The thread block length in threads along the Z dimension
-    int         PTX_ARCH>           ///< The PTX compute capability for which to to specialize this collective
+    int         LEGACY_PTX_ARCH = 0> ///< The PTX compute capability for which to to specialize this collective
 struct BlockHistogramSort
 {
     /// Constants
@@ -77,8 +77,7 @@ struct BlockHistogramSort
             BLOCK_SCAN_WARP_SCANS,
             cudaSharedMemBankSizeFourByte,
             BLOCK_DIM_Y,
-            BLOCK_DIM_Z,
-            PTX_ARCH>
+            BLOCK_DIM_Z>
         BlockRadixSortT;
 
     // Parameterize BlockDiscontinuity type for our thread block
@@ -86,8 +85,7 @@ struct BlockHistogramSort
             T,
             BLOCK_DIM_X,
             BLOCK_DIM_Y,
-            BLOCK_DIM_Z,
-            PTX_ARCH>
+            BLOCK_DIM_Z>
         BlockDiscontinuityT;
 
     /// Shared memory

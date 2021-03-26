@@ -55,7 +55,7 @@ namespace cub {
  *
  * \tparam T                        The scan input/output element type
  * \tparam LOGICAL_WARP_THREADS     <b>[optional]</b> The number of threads per "logical" warp (may be less than the number of hardware warp threads).  Default is the warp size associated with the CUDA Compute Capability targeted by the compiler (e.g., 32 threads for SM20).
- * \tparam PTX_ARCH                 <b>[optional]</b> \ptxversion
+ * \tparam LEGACY_PTX_ARCH          <b>[optional]</b> Unused.
  *
  * \par Overview
  * - Given a list of input elements and a binary reduction operator, a [<em>prefix scan</em>](http://en.wikipedia.org/wiki/Prefix_sum)
@@ -141,7 +141,7 @@ namespace cub {
 template <
     typename    T,
     int         LOGICAL_WARP_THREADS    = CUB_PTX_WARP_THREADS,
-    int         PTX_ARCH                = CUB_PTX_ARCH>
+    int         LEGACY_PTX_ARCH         = 0>
 class WarpScan
 {
 private:
@@ -153,7 +153,7 @@ private:
     enum
     {
         /// Whether the logical warp size and the PTX warp size coincide
-        IS_ARCH_WARP = (LOGICAL_WARP_THREADS == CUB_WARP_THREADS(PTX_ARCH)),
+        IS_ARCH_WARP = (LOGICAL_WARP_THREADS == CUB_WARP_THREADS),
 
         /// Whether the logical warp size is a power-of-two
         IS_POW_OF_TWO = ((LOGICAL_WARP_THREADS & (LOGICAL_WARP_THREADS - 1)) == 0),
