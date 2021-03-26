@@ -1,4 +1,3 @@
-
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -40,6 +39,7 @@
 #include "../../agent/single_pass_scan_operators.cuh"
 #include "../../agent/agent_segment_fixup.cuh"
 #include "../../agent/agent_spmv_orig.cuh"
+#include "../../detail/target.cuh"
 #include "../../util_type.cuh"
 #include "../../util_debug.cuh"
 #include "../../util_device.cuh"
@@ -405,40 +405,34 @@ struct DispatchSpmv
         KernelConfig    &spmv_config,
         KernelConfig    &segment_fixup_config)
     {
-        if (CUB_IS_DEVICE_CODE)
-        {
-            #if CUB_INCLUDE_DEVICE_CODE
-                // We're on the device, so initialize the kernel dispatch configurations with the current PTX policy
-                spmv_config.template Init<PtxSpmvPolicyT>();
-                segment_fixup_config.template Init<PtxSegmentFixupPolicy>();
-            #endif
-        }
-        else
-        {
-            #if CUB_INCLUDE_HOST_CODE
-                // We're on the host, so lookup and initialize the kernel dispatch configurations with the policies that match the device's PTX version
-                if (ptx_version >= 600)
-                {
-                    spmv_config.template            Init<typename Policy600::SpmvPolicyT>();
-                    segment_fixup_config.template   Init<typename Policy600::SegmentFixupPolicyT>();
-                }
-                else if (ptx_version >= 500)
-                {
-                    spmv_config.template            Init<typename Policy500::SpmvPolicyT>();
-                    segment_fixup_config.template   Init<typename Policy500::SegmentFixupPolicyT>();
-                }
-                else if (ptx_version >= 370)
-                {
-                    spmv_config.template            Init<typename Policy370::SpmvPolicyT>();
-                    segment_fixup_config.template   Init<typename Policy370::SegmentFixupPolicyT>();
-                }
-                else
-                {
-                    spmv_config.template            Init<typename Policy350::SpmvPolicyT>();
-                    segment_fixup_config.template   Init<typename Policy350::SegmentFixupPolicyT>();
-                }
-            #endif
-        }
+        NV_IF_TARGET(NV_IS_DEVICE,
+        (
+            // We're on the device, so initialize the kernel dispatch configurations with the current PTX policy
+            spmv_config.template Init<PtxSpmvPolicyT>();
+            segment_fixup_config.template Init<PtxSegmentFixupPolicy>();
+        ), (
+            // We're on the host, so lookup and initialize the kernel dispatch configurations with the policies that match the device's PTX version
+            if (ptx_version >= 600)
+            {
+                spmv_config.template            Init<typename Policy600::SpmvPolicyT>();
+                segment_fixup_config.template   Init<typename Policy600::SegmentFixupPolicyT>();
+            }
+            else if (ptx_version >= 500)
+            {
+                spmv_config.template            Init<typename Policy500::SpmvPolicyT>();
+                segment_fixup_config.template   Init<typename Policy500::SegmentFixupPolicyT>();
+            }
+            else if (ptx_version >= 370)
+            {
+                spmv_config.template            Init<typename Policy370::SpmvPolicyT>();
+                segment_fixup_config.template   Init<typename Policy370::SegmentFixupPolicyT>();
+            }
+            else
+            {
+                spmv_config.template            Init<typename Policy350::SpmvPolicyT>();
+                segment_fixup_config.template   Init<typename Policy350::SegmentFixupPolicyT>();
+            }
+        ));
     }
 
 
@@ -607,13 +601,14 @@ struct DispatchSpmv
             int search_block_size   = INIT_KERNEL_THREADS;
             int search_grid_size    = cub::DivideAndRoundUp(num_merge_tiles + 1, search_block_size);
 
-            #if CUB_INCLUDE_HOST_CODE
-                if (CUB_IS_HOST_CODE)
+            NV_IF_TARGET(NV_IS_HOST,
+            (
+                // Init textures
+                if (CubDebug(error = spmv_params.t_vector_x.BindTexture(spmv_params.d_vector_x)))
                 {
-                    // Init textures
-                    if (CubDebug(error = spmv_params.t_vector_x.BindTexture(spmv_params.d_vector_x))) break;
+                    break;
                 }
-            #endif
+            ));
 
             if (search_grid_size < sm_count)
 //            if (num_merge_tiles < spmv_sm_occupancy * sm_count)
@@ -690,13 +685,13 @@ struct DispatchSpmv
                 if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
             }
 
-            #if CUB_INCLUDE_HOST_CODE
-                if (CUB_IS_HOST_CODE)
+            // Free textures
+            NV_IF_TARGET(NV_IS_HOST, (
+                if (CubDebug(error = spmv_params.t_vector_x.UnbindTexture()))
                 {
-                    // Free textures
-                    if (CubDebug(error = spmv_params.t_vector_x.UnbindTexture())) break;
+                    break;
                 }
-            #endif
+            ));
         }
         while (0);
 
