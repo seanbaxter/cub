@@ -58,9 +58,10 @@ namespace cub {
 
 static_assert(CUB_MAX_DEVICES > 0, "CUB_MAX_DEVICES must be greater than 0.");
 
-/// Whether or not the source targeted by the active compiler pass is allowed to  invoke device kernels or methods from the CUDA runtime API.
+/// Whether or not RDC is enabled:
 #ifndef CUB_RUNTIME_FUNCTION
-    #if !defined(__CUDA_ARCH__) || defined(__CUDACC_RDC__)
+    // TODO nvc++ doesn't have an RDC flag yet. Assume it's enabled.
+    #if defined(__NVCOMPILER_CUDA__) || defined(__CUDACC_RDC__)
         #define CUB_RUNTIME_ENABLED
         #define CUB_RUNTIME_FUNCTION __host__ __device__
     #else
