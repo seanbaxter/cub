@@ -13,7 +13,7 @@ function(cub_build_compiler_targets)
   if ("MSVC" STREQUAL "${CMAKE_CXX_COMPILER_ID}")
     append_option_if_available("/W4" cxx_compile_options)
 
-    append_option_if_available("/WX" cxx_compile_options)
+#    append_option_if_available("/WX" cxx_compile_options)
 
     # Suppress overly-pedantic/unavoidable warnings brought in with /W4:
     # C4324: structure was padded due to alignment specifier
@@ -38,7 +38,7 @@ function(cub_build_compiler_targets)
     # Some tests require /bigobj to fit everything into their object files:
     append_option_if_available("/bigobj" cxx_compile_options)
   else()
-    append_option_if_available("-Werror" cxx_compile_options)
+#    append_option_if_available("-Werror" cxx_compile_options)
     append_option_if_available("-Wall" cxx_compile_options)
     append_option_if_available("-Wextra" cxx_compile_options)
     append_option_if_available("-Winit-self" cxx_compile_options)
@@ -112,7 +112,7 @@ function(cub_build_compiler_targets)
     # Display diagnostic numbers.
     $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CUDA_COMPILER_ID:NVIDIA>>:-Xcudafe=--display_error_number>
     # Promote warnings.
-    $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CUDA_COMPILER_ID:NVIDIA>>:-Xcudafe=--promote_warnings>
+#    $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CUDA_COMPILER_ID:NVIDIA>>:-Xcudafe=--promote_warnings>
     # Don't complain about deprecated GPU targets.
     $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CUDA_COMPILER_ID:NVIDIA>>:-Wno-deprecated-gpu-targets>
   )
