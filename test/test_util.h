@@ -602,7 +602,6 @@ void InitValue(GenMode gen_mode, T &value, int index = 0)
 __host__ __device__ __forceinline__
 void InitValue(GenMode gen_mode, bool &value, int index = 0)
 {
-
   NV_IF_TARGET(
     NV_IS_HOST,
     (
@@ -657,10 +656,8 @@ __host__ __device__ __forceinline__ void InitValue(
     cub::KeyValuePair<KeyT, ValueT>&    value,
     int                                 index = 0)
 {
+    InitValue(gen_mode, value.key, index);
     InitValue(gen_mode, value.value, index);
-
-    // Assign corresponding flag with a likelihood of the last bit being set with entropy-reduction level 3
-    RandomBits(value.key, 3);
     value.key = (value.key & 0x1);
 }
 
