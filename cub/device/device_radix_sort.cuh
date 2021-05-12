@@ -62,8 +62,8 @@ namespace cub {
  *
  * \par
  * DeviceRadixSort can sort all of the built-in C++ numeric primitive types
- * (<tt>unsigned char</tt>, \p int, \p double, etc.) as well as CUDA's \p __half
- * half-precision floating-point type.  Although the direct radix sorting
+ * (`unsigned char`, `int`, `double`, etc.) as well as CUDA's `__half` and
+ * `__nv_bfloat16` 16-bit floating-point types.  Although the direct radix sorting
  * method can only be applied to unsigned integral types, DeviceRadixSort
  * is able to sort signed and floating-point types via simple bit-wise transformations
  * that ensure lexicographic key ordering. For floating-point types -0.0 and +0.0 are
