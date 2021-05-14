@@ -45,7 +45,7 @@ namespace cub {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
 
-#if ((__CUDACC_VER_MAJOR__ >= 9) || defined(__NVCOMPILER_CUDA__) ||            \
+#if ((__CUDACC_VER_MAJOR__ >= 9) || defined(_NVHPC_CUDA) ||            \
      CUDA_VERSION >= 9000) &&                                                  \
   !defined(CUB_USE_COOPERATIVE_GROUPS)
 #define CUB_USE_COOPERATIVE_GROUPS
@@ -61,7 +61,7 @@ static_assert(CUB_MAX_DEVICES > 0, "CUB_MAX_DEVICES must be greater than 0.");
 /// Whether or not RDC is enabled:
 #ifndef CUB_RUNTIME_FUNCTION
     // TODO nvc++ doesn't have an RDC flag yet. Assume it's enabled.
-    #if defined(__NVCOMPILER_CUDA__) || defined(__CUDACC_RDC__)
+    #if defined(_NVHPC_CUDA) || defined(__CUDACC_RDC__)
         #define CUB_RUNTIME_ENABLED
         #define CUB_RUNTIME_FUNCTION __host__ __device__
     #else
